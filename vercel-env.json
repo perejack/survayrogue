@@ -1,0 +1,14 @@
+[
+  {
+    "key": "SUPABASE_URL",
+    "value": "https://fyftqlnobwmmlwcdjgua.supabase.co",
+    "type": "plain",
+    "target": ["production", "preview", "development"]
+  },
+  {
+    "key": "SUPABASE_SERVICE_KEY",
+    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5ZnRxbG5vYndtbWx3Y2RqZ3VhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjEyMzE1MiwiZXhwIjoyMDkxNjk5MTUyfQ.brsAY7H7W9m2s9OYoNnfhQZb0hKB7Q3p3Xb04d4cOxc",
+    "type": "encrypted",
+    "target": ["production", "preview", "development"]
+  }
+]

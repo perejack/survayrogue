@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /survey
+Disallow: /profile
+Disallow: /wallet
+Disallow: /premium
+
+Sitemap: https://surveyke.lovable.app/sitemap.xml
