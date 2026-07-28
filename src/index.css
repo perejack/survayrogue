@@ -1,0 +1,161 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 150 20% 97%;
+    --foreground: 200 25% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 200 25% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 200 25% 10%;
+
+    --primary: 160 84% 39%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 200 25% 95%;
+    --secondary-foreground: 200 25% 10%;
+
+    --muted: 200 15% 93%;
+    --muted-foreground: 200 10% 45%;
+
+    --accent: 38 92% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 200 15% 90%;
+    --input: 200 15% 90%;
+    --ring: 160 84% 39%;
+
+    --radius: 0.75rem;
+
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --hero-overlay: 200 25% 10%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .dark {
+    --background: 200 25% 6%;
+    --foreground: 0 0% 95%;
+    --card: 200 25% 9%;
+    --card-foreground: 0 0% 95%;
+    --popover: 200 25% 9%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 160 84% 39%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 200 20% 14%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 200 20% 14%;
+    --muted-foreground: 200 10% 55%;
+    --accent: 38 92% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 95%;
+    --border: 200 20% 16%;
+    --input: 200 20% 16%;
+    --ring: 160 84% 39%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+  }
+  .glass-strong {
+    @apply bg-card/95 backdrop-blur-2xl border border-border/60;
+  }
+  .gradient-primary {
+    @apply bg-gradient-to-r from-primary to-emerald-400;
+  }
+  .gradient-hero {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(160 70% 30%) 50%, hsl(200 25% 10%) 100%);
+  }
+  .gradient-accent {
+    @apply bg-gradient-to-r from-accent to-amber-400;
+  }
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-emerald-400;
+  }
+  .shimmer {
+    background: linear-gradient(90deg, transparent 0%, hsl(var(--primary) / 0.1) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  .slide-up {
+    animation: slide-up 0.5s ease-out;
+  }
+  .fade-in {
+    animation: fade-in 0.6s ease-out;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px hsl(var(--primary) / 0.2); }
+  50% { box-shadow: 0 0 40px hsl(var(--primary) / 0.4); }
+}
+
+@keyframes slide-up {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
