@@ -144,19 +144,30 @@ export class MpesaService {
   }
 
   static async checkTransactionStatus(checkoutRequestId: string): Promise<HashbackStatusResponse> {
-    const response = await fetch(`${HASHBACK_API_BASE_URL}/status`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ checkoutId: checkoutRequestId }),
-    });
+    try {
+      const response = await fetch(`${HASHBACK_API_BASE_URL}/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ checkoutId: checkoutRequestId }),
+      });
 
-    const data: HashbackStatusResponse | null = await response.json().catch(() => null);
+      const data: HashbackStatusResponse | null = await response.json().catch(() => null);
 
-    if (!response.ok || !data || data.status === 'error') {
-      throw new Error(data?.message || `Status check failed: ${response.status}`);
+      if (!response.ok || !data) {
+        // Network hiccup — return a soft pending so polling continues
+        return { success: false, status: 'pending' };
+      }
+
+      if (data.status === 'error') {
+        // API soft error — keep polling
+        return { success: false, status: 'pending' };
+      }
+
+      return data;
+    } catch {
+      // Any exception → keep polling silently
+      return { success: false, status: 'pending' };
     }
-
-    return data;
   }
 
   static async getPaymentStatus(checkoutRequestId: string): Promise<'completed' | 'failed' | 'pending'> {
@@ -164,22 +175,36 @@ export class MpesaService {
 
     const status = String(data.status ?? data.state ?? '').toLowerCase();
     const rawStatus = String(data.rawStatus ?? '').toLowerCase();
+    const resultDesc = String(data.resultDesc ?? '').toLowerCase();
 
+    // ── Success ──────────────────────────────────────────────────────────────
     if (
       status === 'paid' ||
       status === 'success' ||
+      status === 'completed' ||
       rawStatus === 'completed' ||
       rawStatus === 'success' ||
-      rawStatus === 'paid'
+      rawStatus === 'paid' ||
+      resultDesc.includes('success') ||
+      resultDesc.includes('processed successfully')
     ) {
       return 'completed';
     }
 
+    // ── Conclusive failure ───────────────────────────────────────────────────
     if (
       status === 'failed' ||
       rawStatus === 'failed' ||
       rawStatus === 'cancelled' ||
-      rawStatus === 'canceled'
+      rawStatus === 'canceled' ||
+      resultDesc.includes('cancel') ||
+      resultDesc.includes('insufficient') ||
+      resultDesc.includes('wrong pin') ||
+      resultDesc.includes('invalid pin') ||
+      resultDesc.includes('user cannot be reached') ||
+      resultDesc.includes('ds timeout') ||
+      resultDesc.includes('timed out') ||
+      resultDesc.includes('timeout')
     ) {
       return 'failed';
     }
@@ -192,7 +217,7 @@ export class MpesaService {
     checkoutRequestId: string,
     onComplete: () => void,
     onFailed: () => void,
-    maxAttempts: number = 30,
+    maxAttempts: number = 24, // 24 × 5s = 2 minutes
     amount?: number
   ) {
     let attempts = 0;
@@ -257,7 +282,7 @@ export class MpesaService {
       }
     };
 
-    setTimeout(checkStatus, 5000);
+    setTimeout(checkStatus, 5000); // first check after 5s
   }
 }
 

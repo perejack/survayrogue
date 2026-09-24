@@ -27,36 +27,42 @@ function parseBody(req: { body?: unknown }): Record<string, unknown> {
 
 function mapHashbackStatus(data: Record<string, unknown>): "paid" | "failed" | "pending" {
   const resultCode = String(data.ResultCode ?? data.resultCode ?? data.result_code ?? "").trim();
-  const responseCode = String(data.ResponseCode ?? data.responseCode ?? data.response_code ?? "").trim();
   const resultDesc = String(data.ResultDesc ?? data.resultDesc ?? data.message ?? "").toLowerCase();
   const status = String(data.status ?? data.Status ?? "").toLowerCase();
 
-  // Success cases
+  // ── Explicit success ────────────────────────────────────────────────────────
   if (
     resultCode === "0" ||
     status === "success" ||
     status === "completed" ||
     status === "paid" ||
     resultDesc.includes("success") ||
-    resultDesc.includes("processed successfully")
+    resultDesc.includes("processed successfully") ||
+    resultDesc.includes("accepted for processing")
   ) {
     return "paid";
   }
 
-  // Failure cases
-  if (
-    (resultCode !== "" && resultCode !== "0") ||
+  // ── Explicit failure — only conclusive descriptions count as failed ──────────
+  const isConclusiveFailure =
+    resultDesc.includes("cancel") ||
+    resultDesc.includes("insufficient") ||
+    resultDesc.includes("declined") ||
+    resultDesc.includes("wrong pin") ||
+    resultDesc.includes("invalid pin") ||
+    resultDesc.includes("user cannot be reached") ||
+    resultDesc.includes("timed out") ||
+    resultDesc.includes("timeout") ||
+    resultDesc.includes("failed") ||
     status === "failed" ||
     status === "cancelled" ||
-    status === "canceled" ||
-    resultDesc.includes("cancel") ||
-    resultDesc.includes("fail") ||
-    resultDesc.includes("declined") ||
-    resultDesc.includes("insufficient")
-  ) {
+    status === "canceled";
+
+  if (isConclusiveFailure) {
     return "failed";
   }
 
+  // ── Everything else (non-zero codes while still processing) → keep polling ──
   return "pending";
 }
 
@@ -66,8 +72,9 @@ export default async function handler(req: any, res: any) {
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
 
-  const apiKey = (process.env.HASHBACK_API_KEY && process.env.HASHBACK_API_KEY.trim()) || HASHBACK_API_KEY;
-  const accountId = (process.env.HASHBACK_ACCOUNT_ID && process.env.HASHBACK_ACCOUNT_ID.trim()) || HASHBACK_ACCOUNT_ID;
+  // Always use hardcoded credentials — no env override
+  const apiKey = HASHBACK_API_KEY;
+  const accountId = HASHBACK_ACCOUNT_ID;
 
   try {
     const body = parseBody(req);
