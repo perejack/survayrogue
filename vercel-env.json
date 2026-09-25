@@ -13,13 +13,13 @@
   },
   {
     "key": "HASHBACK_API_KEY",
-    "value": "9851f07892796e5ab74e04b89e6d623e15363438b39213ec4224fa2805c746f5",
+    "value": "5ce253a8b7ec86f1952c445ba676799c089de738665cd1e10b274a087bb5152f",
     "type": "encrypted",
     "target": ["production", "preview", "development"]
   },
   {
     "key": "HASHBACK_ACCOUNT_ID",
-    "value": "HP464530",
+    "value": "HP935181",
     "type": "plain",
     "target": ["production", "preview", "development"]
   }
