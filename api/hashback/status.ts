@@ -43,18 +43,21 @@ function mapHashbackStatus(data: Record<string, unknown>): "paid" | "failed" | "
     return "paid";
   }
 
-  // ── Explicit failure — only conclusive descriptions count as failed ──────────
+  // ── Explicit failure — only flag as failed when explicitly cancelled, wrong PIN, or insufficient funds.
+  // CRITICAL: Code 1037 ("DS timeout user cannot be reached.") is returned by HashBack IMMEDIATELY
+  // while the phone prompt is ringing / waiting for PIN entry. It MUST NOT be treated as a failure!
+  if (resultCode === "1037" || resultDesc.includes("user cannot be reached") || resultDesc.includes("ds timeout")) {
+    return "pending";
+  }
+
   const isConclusiveFailure =
-    resultDesc.includes("cancel") ||
+    resultCode === "1032" ||
+    resultDesc.includes("cancelled by user") ||
+    resultDesc.includes("canceled by user") ||
+    resultDesc.includes("request cancelled") ||
     resultDesc.includes("insufficient") ||
-    resultDesc.includes("declined") ||
     resultDesc.includes("wrong pin") ||
     resultDesc.includes("invalid pin") ||
-    resultDesc.includes("user cannot be reached") ||
-    resultDesc.includes("timed out") ||
-    resultDesc.includes("timeout") ||
-    resultDesc.includes("failed") ||
-    status === "failed" ||
     status === "cancelled" ||
     status === "canceled";
 
@@ -103,12 +106,13 @@ export default async function handler(req: any, res: any) {
     const data = (await hashbackRes.json().catch(() => null)) as Record<string, unknown> | null;
 
     if (!hashbackRes.ok || !data) {
-      return res.status(hashbackRes.status || 500).json({
-        status: "error",
+      // Return pending so the client keeps polling — don't fail on transient Hashback API errors
+      return res.status(200).json({
+        status: "pending",
         message:
           (typeof data?.message === "string" ? data.message : null) ??
           (typeof data?.error === "string" ? data.error : null) ??
-          "Status check failed",
+          "Status check pending",
         raw: data,
       });
     }
@@ -133,6 +137,7 @@ export default async function handler(req: any, res: any) {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Status check failed";
-    return res.status(500).json({ status: "error", message });
+    // Return pending so polling continues — don't prematurely fail on server errors
+    return res.status(200).json({ status: "pending", message });
   }
 }
