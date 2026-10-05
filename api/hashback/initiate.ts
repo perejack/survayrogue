@@ -28,11 +28,20 @@ function parseBody(req: { body?: unknown }): Record<string, unknown> {
 function normalizePhoneNumber(phone: string | undefined | null): string | null {
   if (!phone) return null;
   const cleaned = String(phone).replace(/\D/g, "");
+  // 07XXXXXXXX (10 digits)
   if (cleaned.startsWith("0") && cleaned.length === 10) return `254${cleaned.slice(1)}`;
+  // 2547XXXXXXXX (12 digits) - standard
   if (cleaned.startsWith("254") && cleaned.length === 12) return cleaned;
+  // 7XXXXXXXX or 1XXXXXXXX (9 digits)
   if ((cleaned.startsWith("7") || cleaned.startsWith("1")) && cleaned.length === 9) {
     return `254${cleaned}`;
   }
+  // +25407XXXXXXXX typed → stripped = 25407XXXXXXXX (13 digits) — remove the extra 0
+  if (cleaned.startsWith("2540") && cleaned.length === 13) {
+    return `254${cleaned.slice(4)}`;
+  }
+  // 11-digit 254 prefix — pass through (e.g. test numbers)
+  if (cleaned.startsWith("254") && cleaned.length === 11) return cleaned;
   return null;
 }
 

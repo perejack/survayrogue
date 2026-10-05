@@ -40,6 +40,10 @@ export class MpesaService {
     if (cleaned.startsWith('0') && cleaned.length === 10) return true;
     if (cleaned.startsWith('254') && cleaned.length === 12) return true;
     if ((cleaned.startsWith('7') || cleaned.startsWith('1')) && cleaned.length === 9) return true;
+    // +25407XXXXXXXX → 13 digits
+    if (cleaned.startsWith('2540') && cleaned.length === 13) return true;
+    // 11-digit 254 numbers (e.g. test numbers)
+    if (cleaned.startsWith('254') && cleaned.length === 11) return true;
     return false;
   }
 
